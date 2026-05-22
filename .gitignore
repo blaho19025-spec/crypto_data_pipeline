@@ -7,3 +7,7 @@ logs/
 target/
 dbt_packages/
 data/raw/
+warehouse/*.duckdb
+warehouse/*.wal
+data/raw/*.json
+data/raw/*.parquet

@@ -50,3 +50,4 @@ def save_raw_data(data):
 if __name__ == "__main__":
     data = fetch_crypto_market_data()
     save_raw_data(data)
+    

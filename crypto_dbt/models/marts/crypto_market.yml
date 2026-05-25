@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: crypto_market
+    description: "Mart table containing crypto market snapshot records."
+    columns:
+      - name: coin_id
+        tests:
+          - not_null
+      - name: batch_id
+        tests:
+          - not_null
+      - name: current_price
+        tests:
+          - not_null

@@ -22,25 +22,36 @@ def load_latest_file_to_duckdb():
 
     con = duckdb.connect(str(WAREHOUSE_PATH))
 
-    con.execute("""
-        CREATE SCHEMA IF NOT EXISTS raw;
+    con.execute("CREATE SCHEMA IF NOT EXISTS raw;")
+
+    con.execute(f"""
+        CREATE TABLE IF NOT EXISTS raw.crypto_market AS
+        SELECT *
+        FROM read_parquet('{latest_file}')
+        WHERE 1 = 0;
     """)
 
     con.execute(f"""
-        CREATE OR REPLACE TABLE raw.crypto_market AS
+        INSERT INTO raw.crypto_market
         SELECT *
         FROM read_parquet('{latest_file}');
     """)
 
     row_count = con.execute("""
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
+        FROM raw.crypto_market;
+    """).fetchone()[0]
+
+    batch_count = con.execute("""
+        SELECT COUNT(DISTINCT batch_id)
         FROM raw.crypto_market;
     """).fetchone()[0]
 
     con.close()
 
     print(f"Loaded file: {latest_file}")
-    print(f"Rows loaded into raw.crypto_market: {row_count}")
+    print(f"Total rows in raw.crypto_market: {row_count}")
+    print(f"Total batches in raw.crypto_market: {batch_count}")
 
 
 if __name__ == "__main__":

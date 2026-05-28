@@ -31,11 +31,26 @@ def load_latest_file_to_duckdb():
         WHERE 1 = 0;
     """)
 
-    con.execute(f"""
-        INSERT INTO raw.crypto_market
-        SELECT *
+    batch_id = con.execute(f"""
+        SELECT DISTINCT batch_id
         FROM read_parquet('{latest_file}');
-    """)
+    """).fetchone()[0]
+
+    batch_already_loaded = con.execute("""
+        SELECT COUNT(*)
+        FROM raw.crypto_market
+        WHERE batch_id = ?
+    """, [batch_id]).fetchone()[0]
+
+    if batch_already_loaded > 0:
+        print(f"Batch {batch_id} already loaded. Skipping insert.")
+    else:
+        con.execute(f"""
+            INSERT INTO raw.crypto_market
+            SELECT *
+            FROM read_parquet('{latest_file}');
+        """)
+        print(f"Inserted batch {batch_id}")
 
     row_count = con.execute("""
         SELECT COUNT(*)
